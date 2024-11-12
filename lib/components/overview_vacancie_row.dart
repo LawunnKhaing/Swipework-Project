@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:swipework_app/models/company.dart';
 
-class CompanyRow extends StatefulWidget {
+class OverviewVacancieRow extends StatefulWidget {
   final Company company;
 
-  const CompanyRow({super.key, required this.company});
+  const OverviewVacancieRow({super.key, required this.company});
 
   @override
-  _CompanyRowState createState() => _CompanyRowState();
+  _OverviewVacancieRowState createState() => _OverviewVacancieRowState();
 }
 
-class _CompanyRowState extends State<CompanyRow> {
+class _OverviewVacancieRowState extends State<OverviewVacancieRow> {
   bool _isLiked = false;
 
   @override
@@ -38,14 +38,14 @@ class _CompanyRowState extends State<CompanyRow> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      "${widget.company.amountOfVacancy} vacatures", // Displaying number of vacancies
+                      widget.company.companyName?? 'Unknown Company',
                       style: const TextStyle(
-                          fontWeight: FontWeight.w400,
-                          fontSize: 12,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white),
                     ),
                     Text(
-                      widget.company.companyName?? 'Unknown Company',
+                      widget.company.jobTitle,
                       style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w700,
@@ -53,7 +53,7 @@ class _CompanyRowState extends State<CompanyRow> {
                     ),
                     Row(
                       children: [
-                        Text(widget.company.jobTitle,
+                        Text(widget.company.location,
                             style: const TextStyle(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 12,
@@ -65,7 +65,7 @@ class _CompanyRowState extends State<CompanyRow> {
                           color: Colors.white,
                         ),
                         const SizedBox(width: 5),
-                        Text(widget.company.location,
+                        Text(widget.company.jobType?? 'Unknown Type',
                             style: const TextStyle(
                                 fontWeight: FontWeight.w400,
                                 fontSize: 12,

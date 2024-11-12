@@ -1,11 +1,62 @@
+import 'dart:ffi';
 
 import 'package:flutter/material.dart';
-import 'package:swipework_app/components/company_card.dart';
-import 'package:swipework_app/components/company_row.dart';
+import 'package:swipework_app/components/overview_vacancie_row.dart';
+import 'package:swipework_app/components/overview_scope_card.dart';
 import 'package:swipework_app/models/company.dart';
+import 'package:swipework_app/models/job_scope.dart';
 
-class CompanyOverviewScreen extends StatelessWidget {
-  CompanyOverviewScreen({super.key});
+class OverviewScreen extends StatelessWidget {
+  OverviewScreen({super.key});
+
+
+  // List of dummy Themes
+  final List<JobScope> themes = [
+    JobScope(
+      name: "Remote work",
+      icon: Icons.home,
+      scope: "Thema",
+    ),
+    JobScope(
+      name: "Office work",
+      icon: Icons.domain,
+      scope: "Thema",
+    ),
+    JobScope(
+      name: "Diversiteit & inclusie",
+      icon: Icons.swipe,
+      scope: "Thema",
+    ),
+    JobScope(
+      name: "Casual",
+      icon: Icons.person,
+      scope: "Thema",
+    )
+  ];
+
+  // List of dummy Themes
+  final List<JobScope> fieldOfExpertise = [
+    JobScope(
+      name: "IT",
+      icon: Icons.swipe,
+      scope: "Vakgebied",
+    ),
+    JobScope(
+      name: "Marketing",
+      icon: Icons.business,
+      scope: "Vakgebied",
+    ),
+    JobScope(
+      name: "Human Resources",
+      icon: Icons.person,
+      scope: "Vakgebied",
+    ),
+    JobScope(
+      name: "Community",
+      icon: Icons.home,
+      scope: "Vakgebied",
+    )
+  ];
 
   // List of dummy company data
   final List<Company> companies = [
@@ -16,6 +67,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "TomTom",
       jobTitle: "Software Engineer",
       location: "Amsterdam",
+      jobType: "Part time",
     ),
     Company(
       companyURL:
@@ -24,6 +76,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "Nike",
       jobTitle: "Graphic Designer",
       location: "Rotterdam",
+      jobType: "Full time",
     ),
     Company(
       companyURL:
@@ -32,6 +85,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "Microsoft",
       jobTitle: "Full Stack Developer",
       location: "Utrecht",
+      jobType: "Part time",
     ),
     Company(
       companyURL:
@@ -40,6 +94,8 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "Jumbo",
       jobTitle: "SEO Specialist",
       location: "The Hague",
+      jobType: "Full time",
+
     ),
     Company(
       companyURL:
@@ -48,6 +104,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "TomTom",
       jobTitle: "Software Engineer",
       location: "Amsterdam",
+      jobType: "part time",
     ),
     Company(
       companyURL:
@@ -56,6 +113,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "Nike",
       jobTitle: "Graphic Designer",
       location: "Rotterdam",
+      jobType: "Full time",
     ),
     Company(
       companyURL:
@@ -64,6 +122,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "Microsoft",
       jobTitle: "Full Stack Developer",
       location: "Utrecht",
+      jobType: "Full time",
     ),
     Company(
       companyURL:
@@ -72,6 +131,7 @@ class CompanyOverviewScreen extends StatelessWidget {
       companyName: "Jumbo",
       jobTitle: "SEO Specialist",
       location: "The Hague",
+      jobType: "Part time",
     ),
   ];
 
@@ -97,16 +157,13 @@ class CompanyOverviewScreen extends StatelessWidget {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "${company.amountOfVacancy} vacatures", // Displaying number of vacancies
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    Text(company.companyName ?? "Unknown Company Name"),
+                    Text(company.companyName?? 'Unknown Company'),
+                    Text(company.jobTitle),
                     Row(
                       children: [
-                        Text(company.jobTitle),
-                        const Text("."),
                         Text(company.location),
+                        const Text("."),
+                        Text(company.jobType?? 'Unknown Type'),
                       ],
                     ),
                   ],
@@ -191,7 +248,7 @@ class CompanyOverviewScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 80),
+                const SizedBox(height: 40),
                 Row(
                   children: [
                     Container(
@@ -199,54 +256,68 @@ class CompanyOverviewScreen extends StatelessWidget {
                       color: const Color(0xFF5D47FF),
                       padding: const EdgeInsets.all(10),
                       child: const Text(
-                        "Bedrijven",
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 30),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(20, 0, 0, 10),
-                  child: Text(
-                    "Speciaal voor jou",
-                    textAlign: TextAlign.left,
+                    "Overzicht",
+                    textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white),
+                      fontSize: 24,
+                      fontWeight: FontWeight.w900,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
-                SingleChildScrollView(
-                  scrollDirection: Axis.horizontal,
-                  child: Row(
-                    children: List.generate(5, (index) {
-                      if (index == 0) {
-                        return const Padding(
-                          padding: EdgeInsets.only(left: 20),
-                          child: CompanyCard(
-                              icon: Icons.domain,
-                              information: "Flexibele uren"),
-                        );
-                      }
-                      return const CompanyCard(
-                        icon: Icons.domain,
-                        information: "Flexibele uren",
-                      );
-                    }),
-                  ),
+              ]),
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 0, 10),
+                child: Text(
+                  "Speciaal voor jou",
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
-                const SizedBox(height: 20),
+              ),
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(left: 20),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: themes.map((theme) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: OverviewScopeCard(jobScope: theme),
+                    );
+                  }).toList(),
+                ),
+              ),
+              
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 0, 0, 10),
+                child: Text(
+                  "Algemeen",
+                  textAlign: TextAlign.left,
+                  style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
+                ),
+              ),
+              SingleChildScrollView(
+                padding: const EdgeInsets.only(left: 20),
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: fieldOfExpertise.map((fieldOfExpertise) {
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: OverviewScopeCard(jobScope: fieldOfExpertise),
+                    );
+                  }).toList(),
+                ),
+              ),
                 const Padding(
                   padding: EdgeInsets.fromLTRB(20, 0, 0, 10),
                   child: Text(
-                    "Nieuwe bedrijven",
-                    textAlign: TextAlign.left,
+                  "Nieuwe vacatures",
+                  textAlign: TextAlign.left,
                     style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -274,12 +345,12 @@ class CompanyOverviewScreen extends StatelessWidget {
                             child: Column(
                               children: companies.map((company) {
                                 return Padding(
-                                  padding: const EdgeInsets.only(bottom: 20),
-                                  child: CompanyRow(company: company),
-                                );
-                              }).toList(),
-                            ),
-                          ),
+                      padding: const EdgeInsets.only(bottom: 20),
+                      child: OverviewVacancieRow(company: company),
+                    );
+                  }).toList(),
+                ),
+              ),
                         ),
                       ),
                     ),

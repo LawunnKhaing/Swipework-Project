@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 class SwipeHomeScreen extends StatefulWidget {
   const SwipeHomeScreen({super.key});
@@ -10,35 +11,57 @@ class SwipeHomeScreen extends StatefulWidget {
 class _SwipeHomeScreenState extends State<SwipeHomeScreen> {
   final PageController _pageController = PageController();
   int _currentIndex = 0;
+  late YoutubePlayerController _youtubeController;
 
-  // Example list of items to display
+  // Example list of items to display with YouTube video IDs
   final List<Map<String, String>> items = [
     {
-      'image':
-          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT1MF3KYDQqsVArU1jrKYzKTtImXmv2Wz1-qA&s',
-      'title': 'Company 1',
-      'description': 'Description for Company 1',
+      'videoId': 'F1MipNFzRfw', // YouTube Video ID
+      'title': 'Nike',
+      'description': 'Description for Nike Company',
     },
     {
-      'image':
-          'https://wallpapercave.com/wp/wp6514280.jpg',
-      'title': 'Nike',
+      'videoId': 'bTqVqk7FSmY', // Another YouTube Video ID
+      'title': 'Company 2',
       'description': 'Description for Company 2',
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _initializeYoutubePlayer(_currentIndex);
+  }
+
+  void _initializeYoutubePlayer(int index) {
+    _youtubeController = YoutubePlayerController(
+      initialVideoId: items[index]['videoId']!,
+      flags: const YoutubePlayerFlags(
+        autoPlay: true,
+        loop: true,
+        mute: false,
+      ),
+    );
+  }
+
   void _onSwipeLeft() {
-    // Logic for swipe left action (e.g., dislike)
     setState(() {
       _currentIndex = (_currentIndex + 1) % items.length;
+      _youtubeController.load(items[_currentIndex]['videoId']!);
     });
   }
 
   void _onSwipeRight() {
-    // Logic for swipe right action (e.g., like)
     setState(() {
       _currentIndex = (_currentIndex + 1) % items.length;
+      _youtubeController.load(items[_currentIndex]['videoId']!);
     });
+  }
+
+  @override
+  void dispose() {
+    _youtubeController.dispose();
+    super.dispose();
   }
 
   @override
@@ -54,19 +77,18 @@ class _SwipeHomeScreenState extends State<SwipeHomeScreen> {
               return GestureDetector(
                 onHorizontalDragEnd: (details) {
                   if (details.primaryVelocity! < 0) {
-                    // Swiped left
                     _onSwipeLeft();
                   } else if (details.primaryVelocity! > 0) {
-                    // Swiped right
                     _onSwipeRight();
                   }
                 },
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    Image.network(
-                      items[index]['image']!,
-                      fit: BoxFit.cover,
+                    YoutubePlayer(
+                      controller: _youtubeController,
+                      showVideoProgressIndicator: true,
+                      onReady: () => _youtubeController.play(),
                     ),
                     Container(
                       decoration: BoxDecoration(
@@ -127,7 +149,7 @@ class _SwipeHomeScreenState extends State<SwipeHomeScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.3), // Translucent background
+                      color: Colors.black.withOpacity(0.3),
                     ),
                     padding: const EdgeInsets.all(20),
                     child: const Icon(Icons.close, color: Colors.red, size: 30),
@@ -138,7 +160,7 @@ class _SwipeHomeScreenState extends State<SwipeHomeScreen> {
                   child: Container(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: Colors.black.withOpacity(0.3), // Translucent background
+                      color: Colors.black.withOpacity(0.3),
                     ),
                     padding: const EdgeInsets.all(20),
                     child: const Icon(Icons.favorite, color: Colors.green, size: 30),
