@@ -1,4 +1,8 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:swipework_app/components/circle_background.dart';
+import 'package:swipework_app/components/custom_notched_navbar.dart';
 import 'package:swipework_app/screens/company_overview.dart';
 import 'package:swipework_app/screens/overview.dart';
 import 'package:swipework_app/screens/swipe_home_screen.dart';
@@ -6,6 +10,22 @@ import 'package:swipework_app/screens/company_vacancies.dart';
 
 void main() {
   runApp(const MyApp());
+}
+
+class NavigationItem {
+  final Icon icon;
+  final String? title;
+  final Widget screen;
+  final bool enableScroll;
+  final bool disableNavFade;
+
+  NavigationItem({
+    required this.icon,
+    required this.screen,
+    this.title,
+    this.enableScroll = false,
+    this.disableNavFade = false,
+  });
 }
 
 class MyApp extends StatelessWidget {
@@ -25,24 +45,41 @@ class MyApp extends StatelessWidget {
   }
 }
 
-class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
-
-  @override
-  _HomeScreenState createState() => _HomeScreenState();
-}
-
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 2; // Set initial index to make "Swipe" the main screen
+  final ScrollController _scrollController = ScrollController();
 
   // List of screens for navigation
-  final List<Widget> _screens = [
-    // const HomeScreenContent(),
-    CompanyOverviewScreen(),
-    OverviewScreen(),
-    const SwipeHomeScreen(), // Swipe screen as the main screen
-    CompanyVacanciesScreen(),
-    const ProfileScreen(),
+  final List<NavigationItem> _navigationItems = [
+    NavigationItem(
+      icon: const Icon(Icons.attach_file),
+      title: "Bedrijven",
+      screen: CompanyOverviewScreen(),
+      enableScroll: true,
+    ),
+    NavigationItem(
+      icon: const Icon(Icons.article),
+      title: "Overzicht",
+      screen: OverviewScreen(),
+      enableScroll: false,
+    ),
+    NavigationItem(
+        icon: const Icon(Icons.home),
+        screen: const SwipeHomeScreen(),
+        enableScroll: false,
+        disableNavFade: true),
+    NavigationItem(
+      icon: const Icon(Icons.favorite),
+      title: "Vacatures",
+      screen: CompanyVacanciesScreen(),
+      enableScroll: true,
+    ),
+    NavigationItem(
+      icon: const Icon(Icons.account_circle),
+      title: "Profile",
+      screen: const ProfileScreen(),
+      enableScroll: false,
+    ),
   ];
 
   void _onItemTapped(int index) {
@@ -52,39 +89,124 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose(); // Clean up the controller when not needed
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBody: true, // Allows the body to extend behind the bottom navigation bar
-      body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.white.withOpacity(0.8), // Semi-transparent
-        selectedItemColor: Colors.blue,
-        unselectedItemColor: Colors.black54,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
+      extendBody: true,
+      body: Stack(
+        children: [
+          SizedBox(
+            height: MediaQuery.of(context).size.height,
+            child: CircleBackground(
+              title: _navigationItems[_selectedIndex].title,
+              enableScroll: _navigationItems[_selectedIndex].enableScroll,
+              child: _navigationItems[_selectedIndex].screen,
+            ),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.business),
-            label: 'Overview',
+          if (!_navigationItems[_selectedIndex].disableNavFade)
+            Positioned(
+              bottom: 0, // Adjust according to BottomAppBar height
+              left: 0,
+              right: 0,
+              child: Container(
+                height: 40, // Adjust the height for the fade effect
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      const Color(0xFF42DAD3).withOpacity(0),
+                      const Color(0xFF42DAD3).withOpacity(1.0),
+                      const Color(0xFF42DAD3).withOpacity(1.0),
+                    ],
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.fromLTRB(10, 0, 10, 20),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(40),
+          child: Stack(
+            children: [
+              BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+                child: SizedBox(
+                  child: BottomAppBar(
+                    height: 80,
+                    color: Colors.white.withOpacity(0.4),
+                    shape: CustomCircularNotchedRectangle(
+                        notchOffset: const Offset(-10, 0)),
+                    notchMargin: 8,
+                    child: SizedBox(
+                      child: Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          _buildNavItem(Icons.attach_file, "Bedrijven", 0),
+                          _buildNavItem(Icons.article, "Overzicht", 1),
+                          const SizedBox(
+                              width: 40), // Space for floating button
+                          _buildNavItem(Icons.favorite, "Jouw Jobs", 3),
+                          _buildNavItem(Icons.account_circle, "Profiel", 4),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.swipe),
-            label: 'Swipe',
+        ),
+      ),
+      floatingActionButton: ClipOval(
+        child: BackdropFilter(
+          filter:
+              ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0), // Apply blur effect
+          child: FloatingActionButton(
+            onPressed: () {
+              _onItemTapped(2);
+            },
+            backgroundColor:
+                Colors.white.withOpacity(0.6), // Apply white color with opacity
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(30.0),
+            ),
+            child: const Icon(Icons.home),
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.info),
-            label: 'Details',
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final bool isSelected = _selectedIndex == index;
+
+    return GestureDetector(
+      onTap: () => _onItemTapped(index),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
+            color: isSelected ? Colors.blue : Colors.black,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.blue : Colors.black,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -92,16 +214,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// class HomeScreenContent extends StatelessWidget {
-//   const HomeScreenContent({super.key});
+class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
 
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Center(
-//       child: Text('Home Screen'),
-//     );
-//   }
-// }
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
 
 class DetailsScreen extends StatelessWidget {
   const DetailsScreen({super.key});
@@ -113,8 +231,6 @@ class DetailsScreen extends StatelessWidget {
     );
   }
 }
-
-
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
